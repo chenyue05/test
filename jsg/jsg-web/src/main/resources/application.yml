@@ -1,0 +1,10 @@
+server:
+  port: 8092  
+  #项目发布的路径默认时根目录  
+spring:     #定义springmvc视图解析器
+  mvc:    view:      prefix: /templates/
+      suffix: .html
+      #编辑Dubbo的配置
+
+
+  
