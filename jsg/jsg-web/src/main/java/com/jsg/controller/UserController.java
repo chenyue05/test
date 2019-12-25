@@ -7,8 +7,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.dubbo.config.annotation.Reference;
@@ -23,13 +25,14 @@ import com.jsg.vo.SysResult;
 
 import redis.clients.jedis.JedisCluster;
 
-@RestController
+@Controller
 public class UserController {
 	@Autowired
 	private JedisCluster jedis;
 	@Reference(check = false)
 	private DubboUserService userService;
 	@RequestMapping("security")
+	@ResponseBody
 	public String Security(String phone) {
 		String security="";
 		try {
@@ -41,11 +44,13 @@ public class UserController {
 		return security;
 	}
 	@RequestMapping("/register")
+	@ResponseBody
 	public SysResult register(User user) {
 		userService.insert(user);
 		return SysResult.success("注册成功",null);
 	}
 	@RequestMapping("/checkPhone")
+	@ResponseBody
 	public SysResult checkPhone(String phoneNum) {
 		System.out.println(phoneNum);
 		User user = userService.checkPhone(phoneNum);
@@ -53,6 +58,7 @@ public class UserController {
 		return SysResult.success();
 	}
 	@RequestMapping("/doLogin")
+	@ResponseBody
 	public SysResult doLogin(User user,HttpServletResponse response,HttpServletRequest request) {
 		
 		String ip = IPUtil.getIpAddr(request);
@@ -71,6 +77,7 @@ public class UserController {
 		return SysResult.success("登录成功",user);
 	}
 	@RequestMapping("/user/query")
+	@ResponseBody
 	public SysResult checkeLogin(String ticket,HttpServletRequest request,HttpServletResponse response) {
 		if(StringUtils.isEmpty(ticket)) {
 			return SysResult.fail();
@@ -92,5 +99,20 @@ public class UserController {
 		String userJson=jedis.hget(ticket, "JXG_USER");
 		User user=ObjectMapperUtil.toObject(userJson, User.class);
 		return SysResult.success(user);
+	}
+	@RequestMapping("/user/logout")
+	public String logout(HttpServletRequest request,HttpServletResponse response) {
+		
+		Cookie cookie=CookieUtil.getCookie(request,"JXG_TICKET");
+		if(cookie==null) {
+			return "redirect:/";
+		}
+		//删除redis中的cookie
+		String ticket=cookie.getValue();
+		jedis.del(ticket);
+		//3.删除浏览器中的cookie,规则:定义一个与原来一样名字的cookie,然后进行删除
+		CookieUtil.deleteCookie(response, "JXG_TICKET", 0, "jxg.com", "/");
+		return "redirect:/";
+	
 	}
 }
