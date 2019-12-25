@@ -128,6 +128,6 @@
 		<module>jsg-common</module>
 		<module>jsg-sso</module>
 		<module>jsg-web</module>
-		<module>jt-order</module>
+		<module>jsg-order</module>
 	</modules>
 </project>
