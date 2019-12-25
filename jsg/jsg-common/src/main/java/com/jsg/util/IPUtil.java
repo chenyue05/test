@@ -1,4 +1,4 @@
-package com.jt.util;
+package com.jsg.util;
 
 import javax.servlet.http.HttpServletRequest;
 

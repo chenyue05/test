@@ -6,7 +6,7 @@ spring:
   datasource:
     #引入druid数据源
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://192.168.88.240:3306/jsgdb?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf8&autoReconnect=true&allowMultiQueries=true
+    url: jdbc:mysql://192.168.88.240:3306/jxg?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf8&autoReconnect=true&allowMultiQueries=true
     username: root
     password: root
 #mybatis-plush配置
@@ -21,7 +21,7 @@ logging:
     com.jt.mapper: debug
 dubbo:
   scan:
-    basePackages: com.jt
+    basePackages: com.jsg
   application:
     name: provider-user
   registry:

@@ -30,9 +30,9 @@
 						<div class="form-group">
 							<div class="input-group">
 								<div class="input-group-addon">
-									<span class="glyphicon glyphicon-phone" aria-hidden="true"></span>
+									<span class="glyphicon glyphicon-phoneNum" aria-hidden="true"></span>
 								</div>
-								<input class="form-control phone" name="phone" id="login_phone" required placeholder="手机号" maxlength="11" autocomplete="off" type="text">
+								<input class="form-control phoneNum" name="phoneNum" id="login_phoneNum" required placeholder="手机号" maxlength="11" autocomplete="off" type="text">
 							</div>
 						</div>
 						<div class="form-group">
@@ -92,9 +92,9 @@
 						<div class="form-group">
 							<div class="input-group">
 								<div class="input-group-addon">
-									<span class="glyphicon glyphicon-phone" aria-hidden="true"></span>
+									<span class="glyphicon glyphicon-phoneNum" aria-hidden="true"></span>
 								</div>
-								<input class="form-control phone" name="phone" id="register_phone" required placeholder="手机号" maxlength="11" autocomplete="off" type="text">
+								<input class="form-control phoneNum" name="phoneNum" id="register_phoneNum" required placeholder="手机号" maxlength="11" autocomplete="off" type="text">
 							</div>
 						</div>
 						<div class="form-group">
@@ -153,14 +153,14 @@
 						<div class="form-group">
 							<div class="input-group">
 								<div class="input-group-addon">
-									<span class="glyphicon glyphicon-phone" aria-hidden="true"></span>
+									<span class="glyphicon glyphicon-phoneNum" aria-hidden="true"></span>
 								</div>
-								<input class="form-control phone" name="phone" id="resetpwd_phone" required placeholder="手机号" maxlength="11" autocomplete="off" type="text">
+								<input class="form-control phoneNum" name="phoneNum" id="resetpwd_phoneNum" required placeholder="手机号" maxlength="11" autocomplete="off" type="text">
 							</div>
 						</div>
 						<div class="form-group">
 							<div class="input-group">
-								<input class="form-control" name="sms" id="resetpwd_sms" placeholder="输入验证码" type="text">
+								<input class="form-control"  id="resetpwd_sms" placeholder="输入验证码" type="text">
 								<span class="input-group-btn">
 									<button class="btn btn-primary getsms" type="button">发送短信验证码</button>
 								</span>
@@ -200,7 +200,29 @@
                     </div>
                 </div>
 			</div>
-			<script>
+			<script> 
+				
+				$(function(){
+					$("#register_submit").data("data","");
+					$("#register_phoneNum").blur(function(){
+						
+						var url="/checkPhone";
+						var phoneNum=$("#register_phoneNum").val();
+						var params={"phoneNum":phoneNum}
+						$.getJSON(url,params,function(data){
+							
+							console.log(data);
+							if(data.status!=200){
+								
+								var error = $('.getsms').parents('form').find('.error_msg');
+								error.html(msgtemp('<strong>此电话号码</strong> 已使用',    'alert-warning'));
+							}else{
+								var error = $('.getsms').parents('form').find('.error_msg');
+								error.html(msgtemp('<strong>此电话号码</strong> 可用',    'alert-success'));
+							}
+						})
+					})
+				})
 				$(document).ready(function() {
 					// 判断直接进入哪个页面 例如 login.php?p=register
 					switch($.getUrlParam('p')) {
@@ -210,36 +232,69 @@
 					};
 					// 发送验证码事件
 					$('.getsms').click(function() {
-						var phone = $(this).parents('form').find('input.phone');
+						var phoneNum = $(this).parents('form').find('input.phoneNum');
 						var error = $(this).parents('form').find('.error_msg');
-						switch(phone.validatemobile()) {
+						switch(phoneNum.validatemobile()) {
 							case 0:
+								$("#register_submit").data("data","5205");
+								//getSecurityCode($("#register_phoneNum").val());
 								// 短信验证码的php请求
 								error.html(msgtemp('验证码 <strong>已发送</strong>','alert-success'));
 								$(this).rewire(60);
+								
 							break;
 							case 1: error.html(msgtemp('<strong>手机号码为空</strong> 请输入手机号码',    'alert-warning')); break;
 							case 2: error.html(msgtemp('<strong>手机号码错误</strong> 请输入11位数的号码','alert-warning')); break;
 							case 3: error.html(msgtemp('<strong>手机号码错误</strong> 请输入正确的号码',  'alert-warning')); break;
 						}
 					});
+					function getSecurityCode(phoneNum){
+						
+						var params={"phoneNum":phoneNum}
+						var url="/security"
+						$.getJSON(url,params,function(data){
+							
+							$('.submit').data("data",data);
+							
+						})
+					}
 					// 以下确定按钮仅供参考
-					$('.submit').click(function() {
+					$('#register_submit').click(function() {
+						
+						
+						var security=$("#register_sms").val();
+						
+						var realSecurity=$("#register_submit").data("data");
+						
+						
+						if(realSecurity==""){
+							var error = $(this).parents('form').find('.error_msg');
+							error.html(msgtemp('<strong>注册前</strong> 请先验证手机',    'alert-warning'));
+						}else{
+						if(security==realSecurity){
+						
 						var form = $(this).parents('form')
-						var phone = form.find('input.phone');
+						var phoneNum = form.find('input.phoneNum');
 						var pwd = form.find('input.password');
 						var error = form.find('.error_msg');
 						var success = form.siblings('.tabs_div');
+						
 						var options = {
 							beforeSubmit: function () {
-								console.log('喵喵喵')
+								
+								alert('喵喵喵')
 							},
 							success: function (data) {
-								console.log(data)
+								alert(222);
 							}
 						}
+						}else{
+							var error = $(this).parents('form').find('.error_msg');
+							error.html(msgtemp('<strong>验证码</strong> 验证失败',    'alert-warning'));
+						}
+						}
 						// 验证手机号参考这个
-						switch(phone.validatemobile()) {
+						switch(phoneNum.validatemobile()) {
 							case 1: error.html(msgtemp('<strong>手机号码为空</strong> 请输入手机号码',    'alert-warning')); return; break;
 							case 2: error.html(msgtemp('<strong>手机号码错误</strong> 请输入11位数的号码','alert-warning')); return; break;
 							case 3: error.html(msgtemp('<strong>手机号码错误</strong> 请输入正确的号码',  'alert-warning')); return; break;
@@ -250,13 +305,37 @@
 							case 2: error.html(msgtemp('<strong>密码过短</strong> 请输入6位以上的密码','alert-warning')); return; break;
 							case 3: error.html(msgtemp('<strong>密码过于简单</strong><br>密码需为字母、数字或特殊字符组合',  'alert-warning')); return; break;
 						}
-						form.ajaxForm(options);
+						var error = $(this).parents('form').find('.error_msg');
+						error.html(msgtemp('<strong>注册中</strong>',    'alert-success'));
+						var data=form.serialize();
+						var url="/register";
+						$.get(url,data,function(result){
+							if(result.status==200){
+								alert(result.msg);
+								window.location.href = "/login.html";
+							}
+						});
+						
+						
 						// 请求成功执行类似这样的事件
 						// form.fadeOut(150,function() {
 						// 	success.fadeIn(150);
 						// });
 					})
+					$("#login_submit").click(function(){
+						var form = $(this).parents('form');
+						var data=form.serialize();
+						var url="/doLogin";
+						$.get(url,data,function(result){
+							if(result.status==200){
+								alert(result.msg);
+								window.location.href = "/index.html";
+							}
+						});
+						});
 				});
+				
+				
 			</script>
 		</div>
 	</div>
@@ -271,7 +350,6 @@
 		<!-- 版权 -->
 		<p class="copyright">
 			© 2005-2017 U袋网 版权所有，并保留所有权利<br>
-			ICP备案证书号：闽ICP备16015525号-2&nbsp;&nbsp;&nbsp;&nbsp;福建省宁德市福鼎市南下村小区（锦昌阁）1栋1梯602室&nbsp;&nbsp;&nbsp;&nbsp;Tel: 18650406668&nbsp;&nbsp;&nbsp;&nbsp;E-mail: 18650406668@qq.com
 		</p>
 	</div>
 </body>

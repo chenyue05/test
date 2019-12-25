@@ -5,6 +5,14 @@ spring:     #定义springmvc视图解析器
   mvc:    view:      prefix: /templates/
       suffix: .html
       #编辑Dubbo的配置
+dubbo:
+  scan:
+    basePackages: com.jsg
+  application:
+    name: consumer-web
+  registry:
+    address: zookeeper://192.168.88.129:2181?backup=192.168.88.129:2182,192.168.88.129:2183
 
+  
 
   
