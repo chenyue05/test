@@ -330,7 +330,11 @@
 							if(result.status==200){
 								alert(result.msg);
 								window.location.href = "/index.html";
+							}else{
+								
+								$(".error_msg").html(msgtemp('<strong>密码或者账号</strong> 错误',    'alert-warning'));
 							}
+							
 						});
 						});
 				});

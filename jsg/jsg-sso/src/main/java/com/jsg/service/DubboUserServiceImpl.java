@@ -19,8 +19,12 @@ import com.jsg.mapper.UserMapper;
 import com.jsg.pojo.User;
 import com.jsg.util.ObjectMapperUtil;
 
+import redis.clients.jedis.JedisCluster;
+
 @Service
 public class DubboUserServiceImpl implements DubboUserService {
+	@Autowired
+	private JedisCluster jedis;
 	@Autowired
 	private UserMapper userMapper;
 	@Override
@@ -29,7 +33,7 @@ public class DubboUserServiceImpl implements DubboUserService {
 		HttpClient client = new HttpClient();
 		PostMethod post = new PostMethod("http://sms.webchinese.cn/web_api/");
 		post.addRequestHeader("Content-Type",
-                "application/x-www-form-urlencoded;charset=gbk");//在头文件中设置转码 
+				"application/x-www-form-urlencoded;charset=gbk");//在头文件中设置转码 
 		NameValuePair[] data = { new NameValuePair("Uid", "sqw1234567"),//注册的用户名
 				new NameValuePair("Key", "d41d8cd98f00b204e980"),//注册成功后,登录网站使用的密钥
 				new NameValuePair("smsMob",phone),//手机号码
@@ -77,11 +81,23 @@ public class DubboUserServiceImpl implements DubboUserService {
 		String ticket=DigestUtils.md5DigestAsHex(UUID.randomUUID().toString().getBytes());
 		usr.setPassword("aaaaaaa");
 		String userJSON = ObjectMapperUtil.toJSON(usr);
-		
-		
-		
+		//6.防止用户重复登录,需要将之前的cookie删除
+		if(jedis.exists("JXG_USERNAME"+usr.getPhoneNum())) {
+			String oldTicket=jedis.get("JXG_USERNAME"+usr.getPhoneNum());
+			String oldTicket1=jedis.get("JT_USERNAME"+usr.getPhoneNum());
+			jedis.del(oldTicket);
+			jedis.del(oldTicket1);
+		}
+		//5.将数据保存到redis
+		jedis.hset(ticket, "JXG_USER", userJSON);
+		jedis.hset(ticket, "JXG_USER_IP", ip);
+		jedis.expire(ticket, 7*24*3600);
+		//实现用户与 ticket绑定
+		jedis.setex("JXG_USERNAME"+usr.getPhoneNum(),7*24*3600,ticket);
+
+
 		return ticket;
 	}
 
-	
+
 }

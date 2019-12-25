@@ -14,20 +14,22 @@
 	<script src="js/swiper.min.js" charset="UTF-8"></script>
 	<script src="js/global.js" charset="UTF-8"></script>
 	<script src="js/jquery.DJMask.2.1.1.js" charset="UTF-8"></script>
-	<title>U袋网</title>
+	<script src="js/jquery.cookie.js" charset="UTF-8"></script>
+	<script src="js/jquery.getcookie.js" charset="UTF-8"></script>
+	<title>吉祥购</title>
 </head>
 <body>
 	<!-- 顶部tab -->
 	<div class="tab-header">
 		<div class="inner">
 			<div class="pull-left">
-				<div class="pull-left">嗨，欢迎来到<span class="cr">U袋网</span></div>
+				<div class="pull-left">嗨，欢迎来到<span class="cr">吉祥购</span></div>
 				<a href="agent_level.html">网店代销</a>
 				<a href="temp_article/udai_article4.html">帮助中心</a>
 			</div>
 			<div class="pull-right">
-				<a href="login.html"><span class="cr">登录</span></a>
-				<a href="login.html?p=register">注册</a>
+				<a href="login.html" class="logined"><span class="cr">登录</span></a>
+				<a href="login.html?p=register" class="logined">注册</a>
 				<a href="udai_welcome.html">我的U袋</a>
 				<a href="udai_order.html">我的订单</a>
 				<a href="udai_integral.html">积分平台</a>
@@ -40,7 +42,7 @@
 			<a class="logo" href="index.html"><img src="images/icons/logo.jpg" alt="U袋网" class="cover"></a>
 			<div class="search-box">
 				<form class="input-group">
-					<input placeholder="Ta们都在搜U袋网" type="text">
+					<input placeholder="Ta们都在搜吉祥购" type="text">
 					<span class="input-group-btn">
 						<button type="button">
 							<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
@@ -309,20 +311,20 @@
 			<div class="user-info__box">
 				<div class="login-box">
 					<div class="avt-port">
-						<img src="images/icons/default_avt.png" alt="欢迎来到U袋网" class="cover b-r50">
+						<img src="images/icons/default_avt.png" alt="欢迎来到吉祥购" class="cover b-r50">
 					</div>
 					<!-- 已登录 -->
-					<div class="name c6">Hi~ <span class="cr">18759808122</span></div>
-					<div class="point c6">积分: 30</div>
-
+					<!-- <div class="name c6">Hi~ <span class="cr">18759808122</span></div> -->
+				
+					
 					<!-- 未登录 -->
-					<!-- <div class="name c6">Hi~ 你好</div>
-					<div class="point c6"><a href="">点此登录</a>，发现更多精彩</div> -->
-					<div class="report-box">
+					 <div id="logined_login"><div class="name c6">Hi~ 你好</div>
+					<div class="point c6"><a href="/login.html">点此登录</a>，发现更多精彩</div></div>
+					<!--<div class="report-box">
 						<span class="badge">+30</span>
 						<a class="btn btn-info btn-block disabled" href="#" role="button">已签到1天</a>
-						<!-- <a class="btn btn-primary btn-block" href="#" role="button">签到领积分</a> -->
-					</div>
+						<!-- <a class="btn btn-primary btn-block" href="#" role="button">签到领积分</a> 
+					</div>-->
 				</div>
 				<div class="agent-box">
 					<a href="#" class="agent">
@@ -1042,6 +1044,9 @@
 			// 页面下拉固定楼层导航
 			$('.floor-nav').smartFloat();
 			$('.to-top').toTop({position:false});
+			
+			$(".iconfont icon-cart").attr("data-badge", 2);
+			
 		});
 	</script>
 	<!-- 右侧菜单 -->
@@ -1055,7 +1060,7 @@
 			</li>
 			<li class="r-toolbar-item">
 				<a href="udai_shopcart.html" class="r-item-hd">
-					<i class="iconfont icon-cart" data-badge="10"></i>
+					<i class="iconfont icon-cart" data-badge="0"></i>
 					<div class="r-tip__box"><span class="r-tip-text">购物车</span></div>
 				</a>
 			</li>
@@ -1140,3 +1145,30 @@
 	</div>
 </body>
 </html>
+<script >
+$(function(){
+	
+	//获取指定的cookie数据
+	var _ticket = $.cookie("JXG_TICKET");
+	
+	if(!_ticket){
+		
+		return ;//js方法直接结束
+	}
+	
+	var url="/user/query";
+	var params={"ticket": _ticket}
+	$.getJSON(url,params,function(data){
+		console.log(data);
+		if(data.status == 200){
+			$(".logined").html("");
+			//把json串转化为js对象
+			var html ="<div class='name c6'>Hi~ <span class='cr'>"+data.data.phoneNum+"<a href=\"http://www.jxg.com/user/logout.html\" class=\"link-logout\">[退出]</a></span></div>"
+			$("#logined_login").empty();
+			$("#logined_login").html(html);
+		}
+	}) 
+	//当dataType类型为jsonp时，jQuery就会自动在请求链接上增加一个callback的参数
+	
+})
+</script>
